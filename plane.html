@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flight Exposure + Breathing Exercise</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <style>
+    #breathing-container {
+      position: fixed;
+      left: 50%;
+      bottom: 40px;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.85);
+      border-radius: 20px;
+      text-align: center;
+      padding: 24px 18px 16px 18px;
+      z-index: 3;
+      font-family: sans-serif;
+      box-shadow: 0 2px 8px #3332;
+    }
+    #breathing-circle {
+      width: 80px;
+      height: 80px;
+      margin: 10px auto 8px auto;
+      background: #6ec6ff;
+      border-radius: 50%;
+      transition: transform 4s cubic-bezier(.65,0,.35,1);
+    }
+    #breathing-btn {
+      margin-top: 8px;
+      padding: 8px 18px;
+      font-size: 16px;
+      border-radius: 30px;
+      border: none;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+    }
+    #breath-label { font-size: 20px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <!-- VR/360 Flight Video Scene -->
+  <button id="play-button"
+    style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-size:2rem; width:2.5em; height:2.5em; z-index:10; color:#fff; background:#1976d2; border:none; border-radius:50%;">
+    ▶
+  </button>
+  <a-scene id="vr-scene">
+    <a-assets>
+      <video id="vid" src="https://cdn.glitch.global/8935d2ed-c243-47e6-a74a-c275e93b7f20/cockpit_window.mp4?v=1680226185171" crossorigin="anonymous" loop="true" preload="auto" style="display:none"></video>
+    </a-assets>
+    <a-videosphere src="#vid" rotation="0 -90 0"></a-videosphere>
+    <a-camera></a-camera>
+  </a-scene>
+  <!-- Breathing Exercise Panel -->
+  <div id="breathing-container">
+    <div id="breathing-circle"></div>
+    <div id="breath-label">Press Start</div>
+    <button id="breathing-btn">Start Breathing Exercise</button>
+  </div>
+  <script>
+    // Play 360 video after user taps
+    const playBtn = document.getElementById('play-button');
+    const vid = document.getElementById('vid');
+    playBtn.addEventListener('click', function() {
+      playBtn.style.display = 'none';
+      vid.play();
+    });
+
+    // Breathing animation
+    const circle = document.getElementById('breathing-circle');
+    const label = document.getElementById('breath-label');
+    const btn = document.getElementById('breathing-btn');
+    let running = false, phase = 0, t;
+    const phases = [
+      {text:'Inhale', scale:1.85, dur:4000},
+      {text:'Hold', scale:1.85, dur:2000},
+      {text:'Exhale', scale:1.0, dur:4000},
+      {text:'Hold', scale:1.0, dur:2000},
+    ];
+    function nextBreath() {
+      if (!running) return;
+      circle.style.transform = `scale(${phases[phase].scale})`;
+      label.textContent = phases[phase].text;
+      t = setTimeout(() => {
+        phase = (phase+1)%phases.length;
+        nextBreath();
+      }, phases[phase].dur);
+    }
+    btn.onclick = function() {
+      if (running) {
+        running = false;
+        label.textContent = 'Press Start';
+        btn.textContent = 'Start Breathing Exercise';
+        clearTimeout(t);
+        circle.style.transform = "scale(1)";
+      } else {
+        running = true;
+        phase = 0;
+        btn.textContent = 'Stop';
+        nextBreath();
+      }
+    };
+  </script>
+</body>
+</html>
